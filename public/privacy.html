@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0c0c0c">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="noindex">
+  <title>Privacy · cant.chat</title>
+  <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="pagebody">
+  <header class="top">
+    <a class="logo" href="/" aria-label="cant.chat"><span>cant<span class="dot">.</span>chat</span><span class="origin" title="Built in Sweden"><svg class="flag" viewBox="0 0 16 10" aria-hidden="true"><rect width="16" height="10" fill="#2f5e9e"/><rect x="5" width="2" height="10" fill="#e3c24d"/><rect y="4" width="16" height="2" fill="#e3c24d"/></svg>Byggt i Sverige</span></a>
+  </header>
+  <main class="view page">
+    <nav class="langs"><a href="#en" aria-current="page">English</a><a href="#sv">Svenska</a><a href="#ru">Русский</a></nav>
+
+    <section id="en">
+      <h1>Privacy policy</h1>
+      <p class="note">Last updated: 7 November 2026. In short: cant.chat stores no messages, files, calls or accounts. The server only relays encrypted data it cannot read. The single exception is “notes” (section 3.5): an encrypted block kept until it is first opened, and for at most 7 days.</p>
+
+      <h2>1. Controller</h2>
+      <p>
+        Artem Shmarenkov<br>
+        Kanslihusvägen 4, 961 43 Boden, Sweden<br>
+        Email: <a href="mailto:mail@cant.chat">mail@cant.chat</a>
+      </p>
+      <p>No data protection officer has been appointed, as the conditions of Art. 37 GDPR do not apply.</p>
+
+      <h2>2. What cant.chat is</h2>
+      <p>cant.chat provides one-time conversation rooms for two people in the browser: text, voice and video calls, file transfer, and one-time notes. All content is end-to-end encrypted in the browser (ECDH P-256, HKDF, AES-256-GCM via WebCrypto). The room key lives only in the part of the link after “#”, which browsers never send to servers, or is derived in the browser from a code the participants agreed on.</p>
+
+      <h2>3. What data is processed</h2>
+      <h3>3.1 Visiting the site and during a conversation</h3>
+      <p>Our server runs on Cloudflare's infrastructure (Cloudflare Workers and Durable Objects). For technical reasons the following is processed:</p>
+      <ul>
+        <li>your IP address and connection details (time, browser identifier, amount of data transferred),</li>
+        <li>a room identifier (a cryptographic hash of the key, from which the key cannot be recovered),</li>
+        <li>the encrypted message packets relayed between the two browsers, which neither we nor Cloudflare can read.</li>
+      </ul>
+      <p>We keep no logs (logging is switched off in the Cloudflare configuration) and store nothing permanently. A room exists only in memory while at least one participant is connected, and is discarded when someone leaves. As hosting provider, Cloudflare may briefly process connection metadata (such as IP addresses) for security and operational purposes; see Cloudflare's privacy policy for details.</p>
+      <p>Legal basis: Art. 6 (1) (f) GDPR (legitimate interest in operating and securing the service) and Art. 6 (1) (b) GDPR (providing the requested service).</p>
+
+      <h3>3.2 Calls and files (WebRTC)</h3>
+      <p>Calls and files are transferred directly between the two browsers where possible (WebRTC, encrypted with DTLS-SRTP). As with any direct connection, the other participant learns your device's IP address. To set up the connection, public STUN servers (stun.cloudflare.com, stun.l.google.com) are contacted; they learn only your IP address, never any content.</p>
+      <p>If a direct connection is not possible, or if “Hide my IP” is enabled, the (still encrypted) stream goes through a Cloudflare TURN relay. Cloudflare then sees the participants' IP addresses and the amount of data, but no content.</p>
+
+      <h3>3.3 Local storage in your browser</h3>
+      <p>cant.chat sets no cookies. Only two settings are kept in the browser's localStorage: your chosen language and whether “Hide my IP” is on. They never leave your device.</p>
+
+      <h3>3.4 No analytics, no third-party content</h3>
+      <p>No analytics or tracking services, and no external fonts, scripts or content are embedded.</p>
+
+      <h3>3.5 One-time notes</h3>
+      <p>The “note” feature lets a sender leave a message (text, optionally one image) that the recipient opens once with a code chosen by the sender. The note is encrypted in the sender's browser with a key derived from the code (PBKDF2, AES-256-GCM); the code itself is never transmitted. The server (Cloudflare Durable Objects) stores only the encrypted block together with its expiry — until it is first opened, and at most for the chosen duration (1 hour, 24 hours or 7 days). On opening or expiry the block is deleted. We can neither read nor restore notes. Legal basis: Art. 6 (1) (b) GDPR.</p>
+
+      <h2>4. Recipients and international transfers</h2>
+      <p>Our processor is Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA. Cloudflare is certified under the EU-US Data Privacy Framework; the EU Standard Contractual Clauses apply in addition.</p>
+
+      <h2>5. Retention</h2>
+      <p>We do not store personal data. Connection data exists in memory only for the duration of the connection. Encrypted notes are deleted when opened or when they expire. Any connection metadata held by Cloudflare is subject to Cloudflare's retention periods.</p>
+
+      <h2>6. Your rights</h2>
+      <p>Under the GDPR you have the right of access (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction (Art. 18), data portability (Art. 20) and objection (Art. 21). Since we store no data, our answer to such requests will usually be that no data is held. You also have the right to lodge a complaint with a supervisory authority. For us that is the Swedish Authority for Privacy Protection: Integritetsskyddsmyndigheten (IMY), Box 8114, 104 20 Stockholm, Sweden, <a href="https://www.imy.se/" rel="noopener noreferrer">imy.se</a>. You may also complain to the authority of the EU country where you live.</p>
+
+      <h2>7. Security and limits</h2>
+      <p>Encryption protects content in transit. It cannot stop the other participant from taking screenshots, and it does not help if the link or the code is passed to third parties. Anyone with the link or code can knock on the room; the room's creator decides who gets in, and both sides can verify the connection with four emoji.</p>
+
+      <h2>8. Changes</h2>
+      <p>This policy is updated when the service changes. The version published here applies.</p>
+
+      <p><a class="back" href="/">← back to cant.chat</a></p>
+    </section>
+
+    <section id="sv">
+      <h1>Integritetspolicy</h1>
+      <p class="note">Senast uppdaterad: 7 november 2026. Kort sagt: cant.chat lagrar inga meddelanden, filer, samtal eller konton. Servern vidarebefordrar bara krypterad data som den inte kan läsa. Enda undantaget är ”lappar” (avsnitt 3.5): ett krypterat block som sparas tills det öppnas första gången, dock högst 7 dagar.</p>
+
+      <h2>1. Personuppgiftsansvarig</h2>
+      <p>
+        Artem Shmarenkov<br>
+        Kanslihusvägen 4, 961 43 Boden, Sverige<br>
+        E-post: <a href="mailto:mail@cant.chat">mail@cant.chat</a>
+      </p>
+      <p>Något dataskyddsombud har inte utsetts, eftersom förutsättningarna i artikel 37 GDPR inte är uppfyllda.</p>
+
+      <h2>2. Vad cant.chat är</h2>
+      <p>cant.chat erbjuder engångsrum för samtal mellan två personer direkt i webbläsaren: text, röst- och videosamtal, filöverföring och engångslappar. Allt innehåll totalsträckskrypteras i webbläsaren (ECDH P-256, HKDF, AES-256-GCM via WebCrypto). Rumsnyckeln finns bara i den del av länken som följer efter ”#”, vilken webbläsare aldrig skickar till servrar, eller härleds i webbläsaren från en kod som deltagarna kommit överens om.</p>
+
+      <h2>3. Vilka uppgifter som behandlas</h2>
+      <h3>3.1 Vid besök på webbplatsen och under ett samtal</h3>
+      <p>Vår server körs på Cloudflares infrastruktur (Cloudflare Workers och Durable Objects). Av tekniska skäl behandlas följande:</p>
+      <ul>
+        <li>din IP-adress och anslutningsuppgifter (tidpunkt, webbläsaridentifierare, överförd datamängd),</li>
+        <li>en rumsidentifierare (en kryptografisk hash av nyckeln, ur vilken nyckeln inte kan återskapas),</li>
+        <li>de krypterade meddelandepaket som vidarebefordras mellan de två webbläsarna och som varken vi eller Cloudflare kan läsa.</li>
+      </ul>
+      <p>Vi för inga loggar (loggning är avstängd i Cloudflare-konfigurationen) och lagrar inget permanent. Ett rum finns bara i arbetsminnet så länge minst en deltagare är ansluten och raderas när någon lämnar. Som värdleverantör kan Cloudflare kortvarigt behandla anslutningsmetadata (till exempel IP-adresser) för säkerhets- och driftändamål; se Cloudflares integritetspolicy.</p>
+      <p>Rättslig grund: artikel 6.1 f GDPR (berättigat intresse av att driva och skydda tjänsten) och artikel 6.1 b GDPR (tillhandahållande av den begärda tjänsten).</p>
+
+      <h3>3.2 Samtal och filer (WebRTC)</h3>
+      <p>Samtal och filer överförs om möjligt direkt mellan de två webbläsarna (WebRTC, krypterat med DTLS-SRTP). Som vid varje direktanslutning får motparten veta din enhets IP-adress. För att upprätta anslutningen kontaktas publika STUN-servrar (stun.cloudflare.com, stun.l.google.com); de ser bara din IP-adress, aldrig något innehåll.</p>
+      <p>Om en direktanslutning inte är möjlig, eller om ”Dölj min IP” är aktiverat, går den (fortfarande krypterade) strömmen via ett TURN-relä hos Cloudflare. Cloudflare ser då deltagarnas IP-adresser och datamängden, men inget innehåll.</p>
+
+      <h3>3.3 Lokal lagring i din webbläsare</h3>
+      <p>cant.chat använder inga kakor. I webbläsarens localStorage sparas bara två inställningar: valt språk och om ”Dölj min IP” är på. De lämnar aldrig din enhet.</p>
+
+      <h3>3.4 Ingen analys, inget tredjepartsinnehåll</h3>
+      <p>Inga analys- eller spårningstjänster och inga externa typsnitt, skript eller annat innehåll läses in.</p>
+
+      <h3>3.5 Engångslappar</h3>
+      <p>Funktionen ”lapp” låter en avsändare lämna ett meddelande (text, eventuellt en bild) som mottagaren öppnar en gång med en kod som avsändaren valt. Lappen krypteras i avsändarens webbläsare med en nyckel härledd ur koden (PBKDF2, AES-256-GCM); själva koden skickas aldrig. Servern (Cloudflare Durable Objects) lagrar endast det krypterade blocket tillsammans med dess utgångstid — tills det öppnas första gången, dock högst den valda tiden (1 timme, 24 timmar eller 7 dagar). Vid öppning eller utgång raderas blocket. Vi kan varken läsa eller återställa lappar. Rättslig grund: artikel 6.1 b GDPR.</p>
+
+      <h2>4. Mottagare och överföring till tredje land</h2>
+      <p>Vårt personuppgiftsbiträde är Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA. Cloudflare är certifierat enligt EU-US Data Privacy Framework; dessutom gäller EU:s standardavtalsklausuler.</p>
+
+      <h2>5. Lagringstid</h2>
+      <p>Vi lagrar inga personuppgifter. Anslutningsuppgifter finns i arbetsminnet endast under anslutningens varaktighet. Krypterade lappar raderas när de öppnas eller går ut. Eventuell anslutningsmetadata hos Cloudflare omfattas av Cloudflares lagringstider.</p>
+
+      <h2>6. Dina rättigheter</h2>
+      <p>Enligt GDPR har du rätt till tillgång (artikel 15), rättelse (artikel 16), radering (artikel 17), begränsning av behandling (artikel 18), dataportabilitet (artikel 20) och att göra invändningar (artikel 21). Eftersom vi inte lagrar några uppgifter blir vårt svar på sådana förfrågningar i regel att inga uppgifter finns. Du har också rätt att lämna in klagomål till en tillsynsmyndighet. För oss är det Integritetsskyddsmyndigheten (IMY), Box 8114, 104 20 Stockholm, <a href="https://www.imy.se/" rel="noopener noreferrer">imy.se</a>. Du kan även vända dig till myndigheten i det EU-land där du bor.</p>
+
+      <h2>7. Säkerhet och begränsningar</h2>
+      <p>Krypteringen skyddar innehållet under överföringen. Den kan inte hindra motparten från att ta skärmbilder och hjälper inte om länken eller koden lämnas vidare till tredje part. Den som har länken eller koden kan knacka på rummet; rummets skapare avgör vem som släpps in, och båda sidor kan verifiera anslutningen med fyra emojier.</p>
+
+      <h2>8. Ändringar</h2>
+      <p>Policyn uppdateras när tjänsten ändras. Den version som publiceras här gäller.</p>
+
+      <p><a class="back" href="/">← tillbaka till cant.chat</a></p>
+    </section>
+
+    <section id="ru">
+      <h1>Политика конфиденциальности</h1>
+      <p class="note">Обновлено: 7 ноября 2026. Коротко: cant.chat не хранит сообщения, файлы, звонки и не ведёт учётных записей. Сервер лишь пересылает зашифрованные данные, которые не может прочитать. Единственное исключение — «записки» (раздел 3.5): зашифрованный блок хранится до первого открытия, но не дольше 7 дней.</p>
+
+      <h2>1. Оператор данных</h2>
+      <p>
+        Artem Shmarenkov<br>
+        Kanslihusvägen 4, 961 43 Boden, Швеция<br>
+        E-mail: <a href="mailto:mail@cant.chat">mail@cant.chat</a>
+      </p>
+      <p>Ответственный за защиту данных не назначен, так как условия ст. 37 GDPR не выполняются.</p>
+
+      <h2>2. Что такое cant.chat</h2>
+      <p>cant.chat — одноразовые комнаты для разговора двоих прямо в браузере: текст, голосовые и видеозвонки, передача файлов и одноразовые записки. Всё содержимое шифруется сквозным образом в браузере (ECDH P-256, HKDF, AES-256-GCM через WebCrypto). Ключ комнаты находится только в части ссылки после «#», которую браузеры никогда не отправляют на сервер, либо вычисляется в браузере из кода, о котором договорились участники.</p>
+
+      <h2>3. Какие данные обрабатываются</h2>
+      <h3>3.1 При открытии сайта и во время разговора</h3>
+      <p>Наш сервер работает на инфраструктуре Cloudflare (Cloudflare Workers и Durable Objects). По техническим причинам обрабатываются:</p>
+      <ul>
+        <li>ваш IP-адрес и данные соединения (время, идентификатор браузера, объём переданных данных),</li>
+        <li>идентификатор комнаты (криптографический хеш ключа, из которого ключ восстановить нельзя),</li>
+        <li>зашифрованные пакеты сообщений, пересылаемые между двумя браузерами, — ни мы, ни Cloudflare прочитать их не можем.</li>
+      </ul>
+      <p>Мы не ведём журналов (логирование в настройках Cloudflare выключено) и ничего не храним постоянно. Комната существует только в памяти, пока подключён хотя бы один участник, и уничтожается, когда кто-то выходит. Cloudflare как хостинг-провайдер может кратковременно обрабатывать метаданные соединения (например, IP-адреса) в целях безопасности и работы сервиса; подробности — в политике конфиденциальности Cloudflare.</p>
+      <p>Правовое основание: ст. 6 (1) (f) GDPR (законный интерес в работе и безопасности сервиса) и ст. 6 (1) (b) GDPR (предоставление запрошенной услуги).</p>
+
+      <h3>3.2 Звонки и файлы (WebRTC)</h3>
+      <p>Звонки и файлы по возможности передаются напрямую между двумя браузерами (WebRTC, шифрование DTLS-SRTP). Как при любом прямом соединении, собеседник узнаёт IP-адрес вашего устройства. Для установления соединения запрашиваются публичные STUN-серверы (stun.cloudflare.com, stun.l.google.com); они узнают только ваш IP-адрес, но не содержимое.</p>
+      <p>Если прямое соединение невозможно или включена опция «Скрыть мой IP», (по-прежнему зашифрованный) поток идёт через TURN-ретранслятор Cloudflare. Cloudflare при этом видит IP-адреса участников и объём данных, но не содержимое.</p>
+
+      <h3>3.3 Локальное хранение в браузере</h3>
+      <p>cant.chat не использует cookies. В localStorage браузера хранятся только две настройки: выбранный язык и включена ли опция «Скрыть мой IP». Они не покидают устройство.</p>
+
+      <h3>3.4 Без аналитики и сторонних ресурсов</h3>
+      <p>Не подключаются сервисы аналитики и трекинга, внешние шрифты, скрипты и прочие сторонние ресурсы.</p>
+
+      <h3>3.5 Одноразовые записки</h3>
+      <p>Функция «записка» позволяет оставить сообщение (текст, при желании одно изображение), которое получатель открывает один раз по коду, выбранному отправителем. Записка шифруется в браузере отправителя ключом, выведенным из кода (PBKDF2, AES-256-GCM); сам код никогда не передаётся. На сервере (Cloudflare Durable Objects) хранится только зашифрованный блок вместе со сроком действия — до первого открытия, но не дольше выбранного срока (1 час, 24 часа или 7 дней). При открытии или истечении срока блок удаляется. Прочитать или восстановить записку мы не можем. Правовое основание: ст. 6 (1) (b) GDPR.</p>
+
+      <h2>4. Получатели данных и передача за пределы ЕС</h2>
+      <p>Наш обработчик — Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, США. Cloudflare сертифицирована по EU-US Data Privacy Framework; дополнительно применяются стандартные договорные условия ЕС.</p>
+
+      <h2>5. Срок хранения</h2>
+      <p>Мы не храним персональные данные. Данные соединения существуют в памяти только на время соединения. Зашифрованные записки удаляются при открытии или по истечении срока. Метаданные соединений у Cloudflare хранятся по срокам Cloudflare.</p>
+
+      <h2>6. Ваши права</h2>
+      <p>По GDPR у вас есть право на доступ (ст. 15), исправление (ст. 16), удаление (ст. 17), ограничение обработки (ст. 18), переносимость данных (ст. 20) и возражение (ст. 21). Поскольку мы не храним данные, ответ на такие запросы, как правило, один: данных нет. Вы также вправе подать жалобу в надзорный орган. Для нас это шведский орган по защите персональных данных: Integritetsskyddsmyndigheten (IMY), Box 8114, 104 20 Stockholm, Швеция, <a href="https://www.imy.se/" rel="noopener noreferrer">imy.se</a>. Можно обратиться и в орган той страны ЕС, где вы живёте.</p>
+
+      <h2>7. Безопасность и её границы</h2>
+      <p>Шифрование защищает содержимое при передаче. Оно не помешает собеседнику сделать снимок экрана и не поможет, если ссылку или код передали третьим лицам. Любой, у кого есть ссылка или код, может постучаться в комнату; создатель комнаты решает, кого впустить, и обе стороны могут проверить соединение по четырём эмодзи.</p>
+
+      <h2>8. Изменения</h2>
+      <p>Политика обновляется при изменениях в сервисе. Действует версия, опубликованная здесь.</p>
+
+      <p><a class="back" href="/">← назад на cant.chat</a></p>
+    </section>
+  </main>
+  <script src="/page.js"></script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0c0c0c">
+  <meta name="color-scheme" content="dark">
+  <title>How cant.chat works</title>
+  <meta name="description" content="What happens when you open a room on cant.chat, what the server can and cannot see, and the exact cryptography — written for people first, engineers second.">
+  <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="pagebody">
+  <header class="top">
+    <a class="logo" href="/" aria-label="cant.chat"><span>cant<span class="dot">.</span>chat</span><span class="origin" title="Built in Sweden"><svg class="flag" viewBox="0 0 16 10" aria-hidden="true"><rect width="16" height="10" fill="#2f5e9e"/><rect x="5" width="2" height="10" fill="#e3c24d"/><rect y="4" width="16" height="2" fill="#e3c24d"/></svg>Byggt i Sverige</span></a>
+  </header>
+  <main class="view page">
+    <nav class="langs"><a href="#en" aria-current="page">English</a><a href="#sv">Svenska</a><a href="#ru">Русский</a></nav>
+
+    <section id="en">
+      <h1>How it works</h1>
+      <p class="lead">cant.chat is a room for two that exists only while you're in it. Here is what actually happens — in plain words first, then the exact details for anyone who wants to check our work.</p>
+
+      <h2>1. You open a room</h2>
+      <p>Your browser makes up two things: a room name like <code>silent-fox-42</code> and a 32-byte random key. The key becomes the tail of your link, after the <code>#</code>:</p>
+      <p><code>cant.chat/#silent-fox-42.<b>k3Yk3Yk3Y…</b></code></p>
+      <p>The part after <code>#</code> is special: browsers never send it to a server. Not to ours, not to anyone's. Our server only learns a <em>fingerprint</em> of the key (a hash), which it uses to connect the two of you — and from which the key cannot be recovered.</p>
+
+      <h2>2. They knock, you compare four emoji</h2>
+      <p>When the other person opens the link, both browsers make fresh, one-time key pairs and swap the public halves — encrypted with your link key, so the server only sees noise. From both halves each side derives four emoji. If you both see the same four, there is nobody in the middle: not the server, not someone who intercepted the link. Say them out loud and let them in.</p>
+
+      <h2>3. Who sees what</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 640 300" role="img" aria-label="Diagram: two browsers, encrypted traffic through the server, direct calls between browsers">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="#958b7e"/></marker>
+            <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="#ffad42"/></marker>
+          </defs>
+          <g font-family="system-ui, sans-serif" font-size="13" fill="#ede7dc">
+            <!-- browsers -->
+            <rect x="20" y="90" width="130" height="90" rx="14" fill="#1b1815" stroke="#36302a"/>
+            <text x="85" y="128" text-anchor="middle" font-weight="600">Your browser</text>
+            <text x="85" y="150" text-anchor="middle" fill="#ffad42" font-size="12">has the key</text>
+            <rect x="490" y="90" width="130" height="90" rx="14" fill="#1b1815" stroke="#36302a"/>
+            <text x="555" y="128" text-anchor="middle" font-weight="600">Their browser</text>
+            <text x="555" y="150" text-anchor="middle" fill="#ffad42" font-size="12">has the key</text>
+            <!-- server -->
+            <rect x="250" y="20" width="140" height="70" rx="14" fill="#141210" stroke="#36302a" stroke-dasharray="4 3"/>
+            <text x="320" y="48" text-anchor="middle" font-weight="600">Server</text>
+            <text x="320" y="68" text-anchor="middle" fill="#958b7e" font-size="12">(Cloudflare) · no key</text>
+            <!-- encrypted path via server -->
+            <path d="M150 115 C 200 60, 220 55, 250 55" fill="none" stroke="#958b7e" stroke-width="2" marker-end="url(#arr)"/>
+            <path d="M390 55 C 420 55, 440 60, 490 115" fill="none" stroke="#958b7e" stroke-width="2" marker-end="url(#arr)"/>
+            <text x="320" y="110" text-anchor="middle" fill="#958b7e" font-size="12">messages · knock · call setup</text>
+            <text x="320" y="126" text-anchor="middle" fill="#958b7e" font-size="12">encrypted end to end — the server relays noise</text>
+            <!-- direct path -->
+            <path d="M150 165 L 490 165" fill="none" stroke="#ffad42" stroke-width="2.5" marker-start="url(#arrA)" marker-end="url(#arrA)"/>
+            <text x="320" y="190" text-anchor="middle" fill="#ffad42" font-size="12">calls · video · files — browser to browser (WebRTC)</text>
+            <!-- legend -->
+            <text x="20" y="232" fill="#958b7e" font-size="12">Server sees: IP addresses · time · amount of data · room fingerprint</text>
+            <text x="20" y="252" fill="#9bd58a" font-size="12">Server never sees: the key · text · files · voice · video · names</text>
+            <text x="20" y="280" fill="#958b7e" font-size="12">Optional: “Hide my IP” routes the amber line through a relay, so they don't see your address either.</text>
+          </g>
+        </svg>
+      </figure>
+      <p>The server's whole job is to pass sealed envelopes between two browsers. It keeps no logs and stores nothing: a room is a small object in memory that exists while someone is connected and is discarded afterwards. Like any website host, Cloudflare sees connection metadata — your IP address, when you connected, how much data went through. It never sees content, because content is encrypted with a key it never receives.</p>
+      <p>Calls and files are different: they go straight between the two browsers whenever the network allows (WebRTC, encrypted with DTLS-SRTP). That is faster and keeps the server out entirely — but, like any direct connection, it shows the other person your IP address. If the site has a relay configured, “Hide my IP” in the room menu sends everything through the relay instead.</p>
+
+      <h2>4. You burn it</h2>
+      <p>Hold Burn, or just leave. Both browsers wipe their memory: messages, files, keys. There is no copy on the server to delete, because there never was one. The “Stored: 0 bytes” on the last screen isn't a promise — it's a description.</p>
+
+      <h2>Notes: the one thing the server keeps</h2>
+      <p>A note is for when the other person isn't online yet: write it, seal it with a code you choose, tell them the code. Because they'll open it later, the sealed note has to wait somewhere — and that somewhere is our server. It is the only thing the server ever stores, so here is exactly what that means: the note is encrypted in your browser with a key derived from the code; the server receives the encrypted block and a burn-by time (1 hour, 24 hours or 7 days), nothing else — not the code, not the key. The moment someone opens it, the server deletes it; if nobody does, it burns on schedule. We cannot read a note, restore one, or tell you who opened it.</p>
+      <p>The flip side: the note's safety is the code's safety. Someone who got hold of the encrypted block could try codes offline, so the form asks for at least 8 characters, shows a live strength meter while you type, and the slow hashing makes every guess cost. A short, obvious code is the one way to lose a note.</p>
+
+      <h2>5. What we can't do</h2>
+      <ul>
+        <li>Stop a screenshot. The other person's screen is theirs.</li>
+        <li>Protect you if you hand the link to the wrong person. Whoever has the link can knock; the emoji tell you if someone is <em>in between</em>, not whether the person at the other end is who they claim.</li>
+        <li>Hide that a conversation happened. Metadata (two addresses talked at this time) is visible to the host, as with any website.</li>
+      </ul>
+
+      <h2>For the technically minded</h2>
+      <p class="note">Everything below is implemented with the browser's built-in WebCrypto only; there are no third-party libraries. The code is small and readable: <code>public/crypto.js</code>, <code>public/app.js</code>, <code>public/rtc.js</code>, <code>src/worker.js</code>. <a href="/source.zip" download>Download the full source (zip)</a> — exactly what runs on this site, server included. If you find a weakness, we'd like to hear about it — see the <a href="/abuse.html">Report abuse</a> page.</p>
+      <h3>Keys</h3>
+      <ul>
+        <li><b>Link key</b> — 32 bytes from <code>crypto.getRandomValues</code>, encoded base64url in the URL fragment. Never leaves the browser except inside the link you share.</li>
+        <li><b>Room ID</b> — <code>SHA-256("cant.chat/room:" ‖ linkKey)</code>, first 20 bytes, hex. The only thing the server learns.</li>
+        <li><b>Wrap key</b> — <code>HKDF-SHA256(linkKey, salt = 0³², info = "cant.chat/wrap/v1")</code> → AES-256-GCM. Encrypts the handshake (knock, public keys, admit) so the server cannot substitute keys.</li>
+        <li><b>Identity</b> — per session, each browser generates an ephemeral ECDH P-256 key pair; the raw 65-byte public key is sent inside the wrapped handshake.</li>
+        <li><b>Session key</b> — <code>HKDF-SHA256(ECDH(shared), salt = linkKey, info = "cant.chat/session/v1")</code> → AES-256-GCM. Because the ECDH keys are ephemeral, a link that leaks later cannot decrypt a recorded conversation (forward secrecy against link disclosure).</li>
+        <li><b>Verification emoji</b> — <code>SHA-256("cant.chat/verify:" ‖ linkKey ‖ pubA ‖ pubB)</code> with the public keys sorted bytewise; the first four bytes index a 64-emoji table (24 bits). Equal emoji on both sides ⇒ both sides derived the session from the same two public keys.</li>
+        <li><b>Note</b> — <code>noteKey = HKDF-SHA256(codeKey, 0³², "cant.chat/note/v1")</code>, <code>noteId = SHA-256("cant.chat/note:" ‖ codeKey)[0..20]</code>. The client PUTs <code>{ct, ttl}</code> to <code>/note/&lt;id&gt;</code>; one Durable Object per id stores the sealed block and sets an alarm for expiry; the first POST returns the block and deletes it atomically. Same-site origin check and per-IP rate limits on both operations.</li>
+        <li><b>Room code</b> (optional) — a passphrase the host chooses (minimum 6 characters, with a live strength meter); <code>PBKDF2-SHA256(code, salt = "cant.chat/code/v1", 200 000 iterations)</code> → a temporary key for a one-time “lobby” room through which the real 256-bit link key is handed over, wrapped as above. The code expires in 10 minutes and is single-use. Its strength is the strength of the passphrase: a guessable code can be brute-forced offline by anyone who observed the lobby traffic, which is why the UI shows the strength and the link remains the recommended path.</li>
+      </ul>
+      <h3>Messages</h3>
+      <ul>
+        <li>Every application message is JSON, sealed with AES-256-GCM under the session key with a fresh 96-bit random IV. The plaintext carries the sender role and a strictly increasing counter; the receiver rejects replays, reordering and reflections of its own messages.</li>
+        <li>WebRTC signalling (offers, answers, ICE candidates) travels inside these sealed messages, so the server cannot inject itself into a call. Media is DTLS-SRTP, keys negotiated between the two browsers.</li>
+        <li>Files are split into chunks and sent over a WebRTC data channel (encrypted by DTLS) or, as a fallback, inside sealed messages via the server. Filenames and MIME types are sanitised on receipt; only known image/video/audio types are rendered inline, everything else is offered as a download.</li>
+      </ul>
+      <h3>Server</h3>
+      <ul>
+        <li>A Cloudflare Worker with one Durable Object per room ID; two WebSockets maximum; no storage API is used. Reconnection is authorised by a per-connection random token so a third party with the link cannot displace a participant.</li>
+        <li>TURN credentials are issued only inside a room that already has two participants, rate-limited per connection; new WebSocket connections are rate-limited per IP.</li>
+        <li>Strict CSP (<code>default-src 'none'</code>, no inline scripts), HSTS, no referrer, no cookies, no third-party resources.</li>
+      </ul>
+      <h3>Known limits</h3>
+      <ul>
+        <li>Metadata (IP, timing, sizes, room ID) is visible to the host; traffic analysis is possible in principle.</li>
+        <li>The link is the trust anchor. The emoji check detects a man-in-the-middle, not an impostor who legitimately received the link.</li>
+        <li>There is no identity, so there is no way to re-verify the same person across rooms — by design.</li>
+        <li>Browser code is loaded from the server on every visit; a compromised server could serve malicious code. Open source and reproducible deploys mitigate but do not eliminate this; this is true of every web-based messenger.</li>
+      </ul>
+      <p><a class="back" href="/">← back to cant.chat</a></p>
+    </section>
+
+    <section id="sv">
+      <h1>Så fungerar det</h1>
+      <p class="lead">cant.chat är ett rum för två som bara finns medan ni är i det. Här är vad som faktiskt händer — först med enkla ord, sedan de exakta detaljerna för den som vill granska vårt arbete.</p>
+
+      <h2>1. Du öppnar ett rum</h2>
+      <p>Din webbläsare hittar på två saker: ett rumsnamn som <code>silent-fox-42</code> och en slumpmässig nyckel på 32 byte. Nyckeln blir slutet av din länk, efter <code>#</code>:</p>
+      <p><code>cant.chat/#silent-fox-42.<b>k3Yk3Yk3Y…</b></code></p>
+      <p>Delen efter <code>#</code> är speciell: webbläsare skickar den aldrig till någon server. Inte till vår, inte till någon annans. Vår server får bara veta ett <em>fingeravtryck</em> av nyckeln (en hash), som den använder för att koppla ihop er två — och ur vilket nyckeln inte kan återskapas.</p>
+
+      <h2>2. De knackar, ni jämför fyra emojier</h2>
+      <p>När den andra personen öppnar länken skapar båda webbläsarna nya engångsnyckelpar och byter de publika halvorna — krypterade med din länknyckel, så servern ser bara brus. Ur båda halvorna härleder varje sida fyra emojier. Ser ni båda samma fyra finns ingen emellan: inte servern, inte någon som snappat upp länken. Säg dem högt och släpp in.</p>
+
+      <h2>3. Vem ser vad</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 640 300" role="img" aria-label="Diagram: två webbläsare, krypterad trafik via servern, direkta samtal mellan webbläsarna">
+          <defs>
+            <marker id="arrS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="#958b7e"/></marker>
+            <marker id="arrAS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="#ffad42"/></marker>
+          </defs>
+          <g font-family="system-ui, sans-serif" font-size="13" fill="#ede7dc">
+            <!-- browsers -->
+            <rect x="20" y="90" width="130" height="90" rx="14" fill="#1b1815" stroke="#36302a"/>
+            <text x="85" y="128" text-anchor="middle" font-weight="600">Din webbläsare</text>
+            <text x="85" y="150" text-anchor="middle" fill="#ffad42" font-size="12">har nyckeln</text>
+            <rect x="490" y="90" width="130" height="90" rx="14" fill="#1b1815" stroke="#36302a"/>
+            <text x="555" y="128" text-anchor="middle" font-weight="600">Deras webbläsare</text>
+            <text x="555" y="150" text-anchor="middle" fill="#ffad42" font-size="12">har nyckeln</text>
+            <!-- server -->
+            <rect x="250" y="20" width="140" height="70" rx="14" fill="#141210" stroke="#36302a" stroke-dasharray="4 3"/>
+            <text x="320" y="48" text-anchor="middle" font-weight="600">Server</text>
+            <text x="320" y="68" text-anchor="middle" fill="#958b7e" font-size="12">(Cloudflare) · ingen nyckel</text>
+            <!-- encrypted path via server -->
+            <path d="M150 115 C 200 60, 220 55, 250 55" fill="none" stroke="#958b7e" stroke-width="2" marker-end="url(#arrS)"/>
+            <path d="M390 55 C 420 55, 440 60, 490 115" fill="none" stroke="#958b7e" stroke-width="2" marker-end="url(#arrS)"/>
+            <text x="320" y="110" text-anchor="middle" fill="#958b7e" font-size="12">meddelanden · knack · samtalsuppkoppling</text>
+            <text x="320" y="126" text-anchor="middle" fill="#958b7e" font-size="12">krypterat från ände till ände — servern skickar brus vidare</text>
+            <!-- direct path -->
+            <path d="M150 165 L 490 165" fill="none" stroke="#ffad42" stroke-width="2.5" marker-start="url(#arrAS)" marker-end="url(#arrAS)"/>
+            <text x="320" y="190" text-anchor="middle" fill="#ffad42" font-size="12">samtal · video · filer — webbläsare till webbläsare (WebRTC)</text>
+            <!-- legend -->
+            <text x="20" y="232" fill="#958b7e" font-size="12">Servern ser: IP-adresser · tid · datamängd · rummets fingeravtryck</text>
+            <text x="20" y="252" fill="#9bd58a" font-size="12">Servern ser aldrig: nyckeln · text · filer · röst · video · namn</text>
+            <text x="20" y="280" fill="#958b7e" font-size="12">Valfritt: ”Dölj min IP” leder den ljusa linjen via ett relä, så att inte heller motparten ser din adress.</text>
+          </g>
+        </svg>
+      </figure>
+      <p>Serverns hela uppgift är att skicka förseglade kuvert mellan två webbläsare. Den för inga loggar och lagrar inget: ett rum är ett litet objekt i arbetsminnet som finns medan någon är ansluten och kastas därefter. Som varje webbvärd ser Cloudflare anslutningsmetadata — din IP-adress, när du anslöt, hur mycket data som passerade. Den ser aldrig innehåll, eftersom innehållet är krypterat med en nyckel den aldrig får.</p>
+      <p>Samtal och filer är annorlunda: de går direkt mellan de två webbläsarna så fort nätverket tillåter (WebRTC, krypterat med DTLS-SRTP). Det är snabbare och håller servern helt utanför — men som varje direktanslutning visar det motparten din IP-adress. Har sajten ett relä konfigurerat skickar ”Dölj min IP” i rumsmenyn allt via reläet i stället.</p>
+
+      <h2>4. Du bränner det</h2>
+      <p>Håll Bränn, eller bara gå. Båda webbläsarna rensar sitt minne: meddelanden, filer, nycklar. Det finns ingen kopia på servern att radera, för det fanns aldrig någon. ”Lagrat: 0 byte” på sista skärmen är inget löfte — det är en beskrivning.</p>
+
+      <h2>Lappar: det enda servern behåller</h2>
+      <p>En lapp är för när den andra personen inte är online än: skriv den, försegla den med en kod du väljer, säg koden. Eftersom den öppnas senare måste den förseglade lappen vänta någonstans — och det någonstans är vår server. Det är det enda servern någonsin lagrar, så här är exakt vad det innebär: lappen krypteras i din webbläsare med en nyckel härledd ur koden; servern får det krypterade blocket och en brinntid (1 timme, 24 timmar eller 7 dagar), inget annat — inte koden, inte nyckeln. I samma stund någon öppnar den raderar servern den; gör ingen det brinner den enligt schema. Vi kan inte läsa en lapp, återställa en eller berätta vem som öppnade den.</p>
+      <p>Baksidan: lappens säkerhet är kodens säkerhet. Den som kommit över det krypterade blocket kan prova koder offline, så formuläret kräver minst 8 tecken, visar en styrkemätare medan du skriver, och den långsamma hashningen gör varje gissning dyr. En kort, uppenbar kod är det enda sättet att förlora en lapp.</p>
+
+      <h2>5. Vad vi inte kan göra</h2>
+      <ul>
+        <li>Stoppa en skärmbild. Den andra personens skärm är deras.</li>
+        <li>Skydda dig om du ger länken till fel person. Den som har länken kan knacka; emojierna säger om någon står <em>emellan</em>, inte om personen i andra änden är den de utger sig för.</li>
+        <li>Dölja att ett samtal ägt rum. Metadata (två adresser pratade vid den här tiden) är synlig för värden, som på varje webbplats.</li>
+      </ul>
+
+      <h2>För den tekniskt intresserade</h2>
+      <p class="note">Allt nedan är byggt enbart med webbläsarens inbyggda WebCrypto; inga tredjepartsbibliotek. Koden är liten och läsbar: <code>public/crypto.js</code>, <code>public/app.js</code>, <code>public/rtc.js</code>, <code>src/worker.js</code>. <a href="/source.zip" download>Ladda ner hela källkoden (zip)</a> — exakt det som körs på sajten, servern inräknad. Hittar du en svaghet vill vi gärna höra om det — se sidan <a href="/abuse.html">Anmäl missbruk</a>.</p>
+      <h3>Nycklar</h3>
+      <ul>
+        <li><b>Länknyckel</b> — 32 byte från <code>crypto.getRandomValues</code>, base64url-kodad i URL-fragmentet. Lämnar aldrig webbläsaren utom i länken du delar.</li>
+        <li><b>Rums-ID</b> — <code>SHA-256("cant.chat/room:" ‖ linkKey)</code>, första 20 byte, hex. Det enda servern får veta.</li>
+        <li><b>Omslagsnyckel</b> — <code>HKDF-SHA256(linkKey, salt = 0³², info = "cant.chat/wrap/v1")</code> → AES-256-GCM. Krypterar handskakningen (knack, publika nycklar, insläpp) så att servern inte kan byta ut nycklar.</li>
+        <li><b>Identitet</b> — per session skapar varje webbläsare ett tillfälligt ECDH P-256-nyckelpar; den råa publika nyckeln på 65 byte skickas inuti den omslutna handskakningen.</li>
+        <li><b>Sessionsnyckel</b> — <code>HKDF-SHA256(ECDH(shared), salt = linkKey, info = "cant.chat/session/v1")</code> → AES-256-GCM. Eftersom ECDH-nycklarna är tillfälliga kan en länk som läcker senare inte dekryptera ett inspelat samtal (forward secrecy mot länkläckage).</li>
+        <li><b>Verifieringsemojier</b> — <code>SHA-256("cant.chat/verify:" ‖ linkKey ‖ pubA ‖ pubB)</code> med de publika nycklarna sorterade bytevis; de första fyra byten indexerar en tabell med 64 emojier (24 bitar). Samma emojier på båda sidor ⇒ båda sidor härledde sessionen ur samma två publika nycklar.</li>
+        <li><b>Lapp</b> — <code>noteKey = HKDF-SHA256(codeKey, 0³², "cant.chat/note/v1")</code>, <code>noteId = SHA-256("cant.chat/note:" ‖ codeKey)[0..20]</code>. Klienten PUT:ar <code>{ct, ttl}</code> till <code>/note/&lt;id&gt;</code>; ett Durable Object per id lagrar det förseglade blocket och sätter ett alarm för utgång; första POST returnerar blocket och raderar det atomärt. Same-site-kontroll av origin och hastighetsbegränsning per IP för båda operationerna.</li>
+        <li><b>Rumskod</b> (valfri) — en lösenfras som värden väljer (minst 6 tecken, med styrkemätare); <code>PBKDF2-SHA256(code, salt = "cant.chat/code/v1", 200 000 iterationer)</code> → en tillfällig nyckel för ett engångs-”lobbyrum” genom vilket den riktiga 256-bitarsnyckeln lämnas över, omsluten som ovan. Koden går ut efter 10 minuter och kan bara användas en gång. Dess styrka är lösenfrasens styrka: en gissningsbar kod kan knäckas offline av den som sett lobbytrafiken, därför visar gränssnittet styrkan och länken förblir den rekommenderade vägen.</li>
+      </ul>
+      <h3>Meddelanden</h3>
+      <ul>
+        <li>Varje applikationsmeddelande är JSON, förseglat med AES-256-GCM under sessionsnyckeln med en ny slumpmässig 96-bitars IV. Klartexten bär avsändarens roll och en strikt stigande räknare; mottagaren avvisar återuppspelning, omordning och reflektioner av sina egna meddelanden.</li>
+        <li>WebRTC-signalering (offers, answers, ICE-kandidater) färdas inuti dessa förseglade meddelanden, så servern kan inte skjuta in sig i ett samtal. Media är DTLS-SRTP med nycklar förhandlade mellan de två webbläsarna.</li>
+        <li>Filer delas i bitar och skickas över en WebRTC-datakanal (krypterad av DTLS) eller, som reserv, inuti förseglade meddelanden via servern. Filnamn och MIME-typer saneras vid mottagning; bara kända bild-, video- och ljudtyper visas inline, allt annat erbjuds som nedladdning.</li>
+      </ul>
+      <h3>Server</h3>
+      <ul>
+        <li>En Cloudflare Worker med ett Durable Object per rums-ID; högst två WebSockets; inget lagrings-API används. Återanslutning auktoriseras med en slumpmässig token per anslutning, så att en tredje part med länken inte kan tränga undan en deltagare.</li>
+        <li>TURN-uppgifter utfärdas bara i ett rum som redan har två deltagare, hastighetsbegränsat per anslutning; nya WebSocket-anslutningar begränsas per IP.</li>
+        <li>Strikt CSP (<code>default-src 'none'</code>, inga inline-skript), HSTS, ingen referrer, inga kakor, inga tredjepartsresurser.</li>
+      </ul>
+      <h3>Kända begränsningar</h3>
+      <ul>
+        <li>Metadata (IP, tidpunkter, storlekar, rums-ID) är synlig för värden; trafikanalys är i princip möjlig.</li>
+        <li>Länken är förtroendeankaret. Emojikontrollen upptäcker en man-in-the-middle, inte en bedragare som legitimt fått länken.</li>
+        <li>Det finns ingen identitet, så det går inte att verifiera samma person på nytt mellan rum — avsiktligt.</li>
+        <li>Webbläsarkoden laddas från servern vid varje besök; en komprometterad server skulle kunna skicka skadlig kod. Öppen källkod och reproducerbara deployer mildrar men tar inte bort detta; det gäller varje webbaserad meddelandetjänst.</li>
+      </ul>
+      <p><a class="back" href="/">← tillbaka till cant.chat</a></p>
+    </section>
+
+    <section id="ru">
+      <h1>Как это устроено</h1>
+      <p class="lead">cant.chat — комната на двоих, которая существует, только пока вы в ней. Вот что происходит на самом деле: сначала простыми словами, потом точные детали для тех, кто хочет проверить.</p>
+
+      <h2>1. Ты открываешь комнату</h2>
+      <p>Браузер придумывает две вещи: имя комнаты вроде <code>silent-fox-42</code> и случайный ключ длиной 32 байта. Ключ становится хвостом ссылки, после <code>#</code>:</p>
+      <p><code>cant.chat/#silent-fox-42.<b>k3Yk3Yk3Y…</b></code></p>
+      <p>Часть после <code>#</code> особенная: браузеры никогда не отправляют её серверам. Ни нашему, ни чьему-либо. Наш сервер узнаёт только <em>отпечаток</em> ключа (хеш), по которому сводит вас двоих, — восстановить из него ключ нельзя.</p>
+
+      <h2>2. Собеседник стучится, вы сверяете четыре эмодзи</h2>
+      <p>Когда второй человек открывает ссылку, оба браузера создают свежие одноразовые пары ключей и обмениваются открытыми половинками — зашифрованными ключом из ссылки, так что сервер видит шум. Из обеих половинок каждая сторона вычисляет четыре эмодзи. Если у вас они одинаковые — между вами никого нет: ни сервера, ни того, кто перехватил ссылку. Назовите их вслух и впускайте.</p>
+
+      <h2>3. Кто что видит</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 640 300" role="img" aria-label="Схема: два браузера, шифрованный трафик через сервер, прямые звонки между браузерами">
+          <g font-family="system-ui, sans-serif" font-size="13" fill="#ede7dc">
+            <rect x="20" y="90" width="130" height="90" rx="14" fill="#1b1815" stroke="#36302a"/>
+            <text x="85" y="128" text-anchor="middle" font-weight="600">Твой браузер</text>
+            <text x="85" y="150" text-anchor="middle" fill="#ffad42" font-size="12">знает ключ</text>
+            <rect x="490" y="90" width="130" height="90" rx="14" fill="#1b1815" stroke="#36302a"/>
+            <text x="555" y="128" text-anchor="middle" font-weight="600">Его браузер</text>
+            <text x="555" y="150" text-anchor="middle" fill="#ffad42" font-size="12">знает ключ</text>
+            <rect x="250" y="20" width="140" height="70" rx="14" fill="#141210" stroke="#36302a" stroke-dasharray="4 3"/>
+            <text x="320" y="48" text-anchor="middle" font-weight="600">Сервер</text>
+            <text x="320" y="68" text-anchor="middle" fill="#958b7e" font-size="12">(Cloudflare) · без ключа</text>
+            <path d="M150 115 C 200 60, 220 55, 250 55" fill="none" stroke="#958b7e" stroke-width="2" marker-end="url(#arr)"/>
+            <path d="M390 55 C 420 55, 440 60, 490 115" fill="none" stroke="#958b7e" stroke-width="2" marker-end="url(#arr)"/>
+            <text x="320" y="110" text-anchor="middle" fill="#958b7e" font-size="12">сообщения · тук-тук · установка звонка</text>
+            <text x="320" y="126" text-anchor="middle" fill="#958b7e" font-size="12">сквозное шифрование — сервер пересылает шум</text>
+            <path d="M150 165 L 490 165" fill="none" stroke="#ffad42" stroke-width="2.5" marker-start="url(#arrA)" marker-end="url(#arrA)"/>
+            <text x="320" y="190" text-anchor="middle" fill="#ffad42" font-size="12">звонки · видео · файлы — браузер↔браузер (WebRTC)</text>
+            <text x="20" y="232" fill="#958b7e" font-size="12">Сервер видит: IP-адреса · время · объём данных · отпечаток комнаты</text>
+            <text x="20" y="252" fill="#9bd58a" font-size="12">Сервер никогда не видит: ключ · текст · файлы · голос · видео · имена</text>
+            <text x="20" y="280" fill="#958b7e" font-size="12">По желанию: «Скрыть мой IP» пускает янтарную линию через релей — собеседник тоже не видит адрес.</text>
+          </g>
+        </svg>
+      </figure>
+      <p>Вся работа сервера — передавать запечатанные конверты между двумя браузерами. Он не ведёт логов и ничего не хранит: комната — маленький объект в памяти, который существует, пока кто-то подключён, и после этого выбрасывается. Как любой хостинг, Cloudflare видит метаданные соединения: твой IP-адрес, время, объём данных. Содержимое он не видит никогда, потому что оно зашифровано ключом, которого у него нет.</p>
+      <p>Звонки и файлы устроены иначе: они идут напрямую между браузерами, когда сеть это позволяет (WebRTC, шифрование DTLS-SRTP). Так быстрее, и сервер вообще не участвует — но, как любое прямое соединение, это показывает собеседнику твой IP-адрес. Если на сайте настроен релей, пункт «Скрыть мой IP» в меню комнаты пустит всё через него.</p>
+
+      <h2>4. Ты сжигаешь</h2>
+      <p>Зажми «Сжечь» или просто выйди. Оба браузера стирают память: сообщения, файлы, ключи. На сервере нечего удалять, потому что копии там никогда не было. «Сохранено: 0 байт» на последнем экране — не обещание, а описание.</p>
+
+      <h2>Записки: единственное, что сервер хранит</h2>
+      <p>Записка — для случая, когда собеседник ещё не в сети: напиши, запечатай кодом, который придумал сам, назови код. Раз откроют позже, запечатанная записка должна где-то ждать — и это «где-то» наш сервер. Это единственное, что он вообще хранит, поэтому вот ровно что это значит: записка шифруется в твоём браузере ключом, выведенным из кода; сервер получает зашифрованный блок и время сгорания (1 час, 24 часа или 7 дней) — и больше ничего: ни кода, ни ключа. В момент открытия сервер удаляет блок; если никто не открыл — он сгорает по сроку. Мы не можем ни прочитать записку, ни восстановить, ни сказать, кто её открыл.</p>
+      <p>Обратная сторона: безопасность записки равна безопасности кода. Тот, кто добыл зашифрованный блок, может подбирать коды оффлайн, поэтому форма просит минимум 8 знаков, показывает силу кода прямо при вводе, а медленное хеширование делает каждую попытку дорогой. Короткий очевидный код — единственный способ потерять записку.</p>
+
+      <h2>5. Чего мы не можем</h2>
+      <ul>
+        <li>Запретить скриншот. Экран собеседника — его экран.</li>
+        <li>Защитить, если ты отдал ссылку не тому. Кто имеет ссылку, тот может постучаться; эмодзи показывают, нет ли кого <em>между</em> вами, а не то, что на том конце именно тот, за кого себя выдаёт.</li>
+        <li>Скрыть сам факт разговора. Метаданные (два адреса общались в такое-то время) видны хостингу, как у любого сайта.</li>
+      </ul>
+
+      <h2>Для технически подкованных</h2>
+      <p class="note">Всё ниже реализовано только встроенным в браузер WebCrypto, без сторонних библиотек. Код небольшой и читаемый: <code>public/crypto.js</code>, <code>public/app.js</code>, <code>public/rtc.js</code>, <code>src/worker.js</code>. <a href="/source.zip" download>Скачать весь исходный код (zip)</a> — ровно то, что работает на сайте, включая сервер. Нашли слабое место — напишите, контакт на странице <a href="/abuse.html">«Сообщить о нарушении»</a>.</p>
+      <h3>Ключи</h3>
+      <ul>
+        <li><b>Ключ ссылки</b> — 32 байта из <code>crypto.getRandomValues</code>, base64url во фрагменте URL. Покидает браузер только внутри ссылки, которую ты отправляешь сам.</li>
+        <li><b>ID комнаты</b> — <code>SHA-256("cant.chat/room:" ‖ linkKey)</code>, первые 20 байт в hex. Единственное, что узнаёт сервер.</li>
+        <li><b>Ключ обёртки</b> — <code>HKDF-SHA256(linkKey, salt = 0³², info = "cant.chat/wrap/v1")</code> → AES-256-GCM. Шифрует рукопожатие (стук, открытые ключи, «впустить»), чтобы сервер не мог подменить ключи.</li>
+        <li><b>Личность</b> — на сессию каждый браузер создаёт эфемерную пару ECDH P-256; открытый ключ (65 байт raw) передаётся внутри обёрнутого рукопожатия.</li>
+        <li><b>Ключ сессии</b> — <code>HKDF-SHA256(ECDH(shared), salt = linkKey, info = "cant.chat/session/v1")</code> → AES-256-GCM. Ключи ECDH одноразовые, поэтому ссылка, утёкшая позже, не расшифрует записанный разговор.</li>
+        <li><b>Эмодзи сверки</b> — <code>SHA-256("cant.chat/verify:" ‖ linkKey ‖ pubA ‖ pubB)</code>, открытые ключи отсортированы побайтно; первые четыре байта индексируют таблицу из 64 эмодзи (24 бита). Одинаковые эмодзи ⇒ обе стороны вывели сессию из одних и тех же двух открытых ключей.</li>
+        <li><b>Записка</b> — <code>noteKey = HKDF-SHA256(codeKey, 0³², "cant.chat/note/v1")</code>, <code>noteId = SHA-256("cant.chat/note:" ‖ codeKey)[0..20]</code>. Клиент кладёт <code>{ct, ttl}</code> методом PUT в <code>/note/&lt;id&gt;</code>; один Durable Object на id хранит запечатанный блок и ставит будильник на срок; первый POST отдаёт блок и удаляет его атомарно. Проверка same-site origin и лимиты по IP на обе операции.</li>
+        <li><b>Код комнаты</b> (по желанию) — фраза, которую придумывает хозяин (минимум 6 знаков, с живым индикатором силы); <code>PBKDF2-SHA256(код, salt = "cant.chat/code/v1", 200 000 итераций)</code> → временный ключ одноразовой «прихожей», через которую передаётся настоящий 256-битный ключ ссылки, завёрнутый как выше. Код живёт 10 минут и работает один раз. Его стойкость равна стойкости фразы: угадываемый код можно перебрать оффлайн, наблюдая трафик прихожей, — поэтому интерфейс показывает силу кода, а ссылка остаётся рекомендуемым путём.</li>
+      </ul>
+      <h3>Сообщения</h3>
+      <ul>
+        <li>Каждое сообщение приложения — JSON, запечатанный AES-256-GCM ключом сессии со свежим случайным IV 96 бит. Внутри — роль отправителя и строго растущий счётчик; получатель отбрасывает повторы, перестановки и отражения своих же сообщений.</li>
+        <li>Сигналинг WebRTC (offer, answer, ICE-кандидаты) идёт внутри этих запечатанных сообщений, поэтому сервер не может встроиться в звонок. Медиа — DTLS-SRTP, ключи согласуют сами браузеры.</li>
+        <li>Файлы режутся на куски и идут по каналу данных WebRTC (шифрование DTLS) или, как запасной путь, внутри запечатанных сообщений через сервер. Имена файлов и MIME-типы очищаются при приёме; встраиваются только известные типы картинок/видео/аудио, остальное — только скачать.</li>
+      </ul>
+      <h3>Сервер</h3>
+      <ul>
+        <li>Cloudflare Worker, один Durable Object на ID комнаты; максимум два WebSocket; API хранилища не используется. Переподключение подтверждается случайным токеном соединения, поэтому третий со ссылкой не может вытеснить участника.</li>
+        <li>Доступы TURN выдаются только в комнате, где уже двое, с лимитом на соединение; новые WebSocket-подключения ограничены по IP.</li>
+        <li>Строгая CSP (<code>default-src 'none'</code>, без inline-скриптов), HSTS, no-referrer, без cookies и сторонних ресурсов.</li>
+      </ul>
+      <h3>Известные ограничения</h3>
+      <ul>
+        <li>Метаданные (IP, время, размеры, ID комнаты) видны хостингу; анализ трафика в принципе возможен.</li>
+        <li>Ссылка — якорь доверия. Сверка эмодзи ловит «человека посередине», а не самозванца, который законно получил ссылку.</li>
+        <li>Личности нет, поэтому нельзя узнать того же человека в другой комнате — так задумано.</li>
+        <li>Код браузера загружается с сервера при каждом визите; скомпрометированный сервер мог бы отдать вредоносный код. Открытый код и воспроизводимые деплои снижают риск, но не убирают его — это верно для любого веб-мессенджера.</li>
+      </ul>
+      <p><a class="back" href="/">← назад на cant.chat</a></p>
+    </section>
+  </main>
+  <script src="/page.js"></script>
+</body>
+</html>

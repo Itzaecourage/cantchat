@@ -1,0 +1,30 @@
+let pw;
+try { pw = require('playwright'); } catch { pw = require('/opt/npm-tools/node_modules/playwright'); }
+const { chromium } = pw;
+const LAUNCH = process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {};
+const PUB = require('path').join(__dirname, '..', 'public');
+const { execSync, spawn } = require('child_process');
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const BIG = require('path').join(require('os').tmpdir(), 'cant-big.bin');
+require('fs').writeFileSync(BIG, require('crypto').randomBytes(3000000));
+(async () => {
+  const browser = await chromium.launch({ ...LAUNCH, args: ['--no-sandbox'] });
+  const errs = [];
+  const mk = async (n) => { const p = await (await browser.newContext({ locale: 'ru-RU' })).newPage(); p.on('pageerror', e => errs.push(n + e.message)); return p; };
+  const A = await mk('A'), B = await mk('B');
+  await A.goto('http://localhost:8788/'); await A.click('#create');
+  const link = await A.inputValue('#shareLink');
+  await B.goto(link); await A.waitForSelector('#knockPanel:not([hidden])'); await A.click('#admit');
+  await B.waitForSelector('#chat:not([hidden])');
+  execSync("pkill -f '[n]ode .*devserver' || true");
+  await sleep(1500);
+  console.log('during outage A:', await A.textContent('#status'), '| B:', await B.textContent('#status'));
+  await A.fill('#input', 'написано во время обрыва'); await A.press('#input', 'Enter');
+  spawn('node', [require('path').join(__dirname, 'devserver.cjs'), PUB], { detached: true, stdio: 'ignore' }).unref();
+  await B.waitForFunction(() => [...document.querySelectorAll('.msg.theirs')].some(m => m.textContent.includes('во время обрыва')), null, { timeout: 20000 });
+  await B.fill('#input', 'и я тут'); await B.press('#input', 'Enter');
+  await A.waitForFunction(() => [...document.querySelectorAll('.msg.theirs')].some(m => m.textContent.includes('и я тут')), null, { timeout: 10000 });
+  console.log('after restart A:', await A.textContent('#status'), '| B:', await B.textContent('#status'), '| messages both ways: ok');
+  console.log('errors:', errs.length ? errs : 'none');
+  await browser.close();
+})().catch(e => { console.error('FAIL', e.message); process.exit(1); });

@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0c0c0c">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>cant.chat</title>
+  <meta name="description" content="A secret language for one conversation. One-time encrypted rooms for two: chat, calls, files. Nothing to install, nothing stored. Leave, and it's gone.">
+  <meta property="og:title" content="cant.chat">
+  <meta property="og:description" content="A secret language for one conversation.">
+  <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/favicon.svg?v=3">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <!-- Свои иконки: ни одной внешней картинки или шрифта -->
+  <svg width="0" height="0" class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="7" width="13" height="10" rx="2"/><path d="M16 11l5-3v8l-5-3z"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path class="fill" d="M12 2.5c1.2 3.2 4.5 5.4 4.5 9.6a4.5 4.5 0 0 1-9 0c0-2.1 1-3.6 2.2-4.9.3 1.9 1.1 2.8 1.9 3 .1-2.7-.4-5.2.4-7.7z"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></symbol>
+    <symbol id="i-mic-off" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8M4 4l16 16"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-cam-off" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4zM4 4l16 16"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-flip" viewBox="0 0 24 24"><path d="M17 2l3 3-3 3M20 5H9a5 5 0 0 0-5 5M7 22l-3-3 3-3M4 19h11a5 5 0 0 0 5-5"/></symbol>
+    <symbol id="i-screen" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+    <symbol id="i-mask" viewBox="0 0 24 24"><path d="M3 6c3-1.2 6-1.2 9 0 3-1.2 6-1.2 9 0v5c0 5-4 8.2-9 9.5C7 19.2 3 16 3 11z"/><path d="M7.5 11.5c1-1 2-1 3 0M13.5 11.5c1-1 2-1 3 0"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-attach" viewBox="0 0 24 24"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7L14 4.5a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7.5"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle class="fill" cx="5" cy="12" r="1.7"/><circle class="fill" cx="12" cy="12" r="1.7"/><circle class="fill" cx="19" cy="12" r="1.7"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path class="fill" d="M3 11.2L20.5 3.5 13 21l-2.2-7.4z"/><path d="M10.8 13.6l9.7-10.1"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path class="fill" d="M7.5 4.5l12 7.5-12 7.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect class="fill" x="6" y="4.5" width="4" height="15" rx="1"/><rect class="fill" x="14" y="4.5" width="4" height="15" rx="1"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14h1v1h-1zM14 20h1v1h-1zM18 18h3v3h-3z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 7"/></symbol>
+    <symbol id="i-reply" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h9a7 7 0 0 1 7 7v4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-8-5-8-11a4 4 0 0 1 8-2 4 4 0 0 1 8 2c0 6-8 11-8 11z"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M9 3H3v6M15 3h6v6M3 15v6h6M21 15v6h-6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M7 3h10v4l-4 5 4 5v4H7v-4l4-5-4-5z"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16zM14 7l3 3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10 10a3 3 0 0 0 4 4M9 5a10 10 0 0 1 12 7 10 10 0 0 1-3 4M5 8a10 10 0 0 0-2 4 10 10 0 0 0 11 7"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6zM14 3v5h5"/></symbol>
+    <symbol id="i-door" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="1"/><circle class="fill" cx="15" cy="12" r="1.2"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 3h6"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M15 8l3 3M18 5l3 3"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></symbol>
+    <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M3 3l18 18M5 10a12 12 0 0 1 5-3M2 7a16 16 0 0 1 7-4M12 20h.01M8.5 16.5a5 5 0 0 1 7 0M15 11a9 9 0 0 1 4 2.5"/></symbol>
+  </svg>
+
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="logo" href="/" aria-label="cant.chat"><span>cant<span class="dot">.</span>chat</span><span class="origin" title="Built in Sweden"><svg class="flag" viewBox="0 0 16 10" aria-hidden="true"><rect width="16" height="10" fill="#2f5e9e"/><rect x="5" width="2" height="10" fill="#e3c24d"/><rect y="4" width="16" height="2" fill="#e3c24d"/></svg>Byggt i Sverige</span></a>
+    <button id="lang" class="chip" type="button" aria-label="language">EN</button>
+  </header>
+
+  <!-- Главная -->
+  <main id="home" class="view">
+    <section class="doors">
+      <div class="door roomdoor">
+        <span class="k" data-i18n="doorRoomK"></span>
+        <h2 data-i18n="doorRoom"></h2>
+        <p data-i18n="doorRoomSub"></p>
+        <button id="create" class="primary" type="button" data-i18n="create"></button>
+        <footer class="homefoot left">
+          <a href="/how.html" data-i18n="footSource"></a>
+          <a href="/legal.html" data-i18n="footImpressum"></a>
+        </footer>
+      </div>
+      <div class="door notedoor">
+        <span class="k" data-i18n="doorNoteK"></span>
+        <h2 data-i18n="doorNote"></h2>
+        <p data-i18n="doorNoteSub"></p>
+        <button id="noteBtn" class="primary" type="button" data-i18n="noteBtn"></button>
+        <footer class="homefoot right">
+          <a href="/privacy.html" data-i18n="footPrivacy"></a>
+          <a href="/abuse.html" data-i18n="footAbuse"></a>
+        </footer>
+      </div>
+    </section>
+
+    <form id="codeForm" class="codebar" autocomplete="off">
+      <input id="codeInput" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="code" maxlength="64">
+      <button id="codeGo" type="submit" data-i18n="codeGo"></button>
+      <p id="codeErr" class="small codeerr" hidden></p>
+    </form>
+    <p class="under"><span data-i18n="checkLine"></span> <button type="button" id="checkBtn" data-i18n="checkBtn"></button></p>
+
+    <!-- «Проверь»: живой шифр. Настоящее AES-GCM со случайным ключом этой страницы, ничего никуда не уходит. -->
+    <div id="cipherPop" class="pop" hidden>
+      <button type="button" class="x" id="cipherClose" aria-label="close"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
+      <label class="t" for="cipherIn" data-i18n="cipherYou"></label>
+      <input id="cipherIn" type="text" autocomplete="off" maxlength="200">
+      <span class="t" data-i18n="cipherServer"></span>
+      <div class="out" id="cipherOut"></div>
+      <p class="hint"><span data-i18n="cipherHint"></span> <a href="/how.html" data-i18n="footSource"></a> →</p>
+    </div>
+  </main>
+
+  <!-- Комната -->
+  <main id="room" class="view" hidden>
+    <div class="roombar">
+      <div class="roominfo">
+        <div class="roomname" id="roomName"></div>
+        <div class="status" id="status"><svg class="ico" aria-hidden="true"><use id="statusIcon" href="#i-lock"/></svg><span id="statusText"></span></div>
+      </div>
+      <button id="audioCall" class="iconbtn" type="button" hidden><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg></button>
+      <button id="videoCall" class="iconbtn" type="button" hidden><svg class="ico" aria-hidden="true"><use href="#i-video"/></svg></button>
+      <button id="burn" class="danger" type="button"><span class="fuse" aria-hidden="true"></span><svg class="ico" aria-hidden="true"><use href="#i-flame"/></svg><span id="burnLabel" data-i18n="burn"></span></button>
+    </div>
+
+    <div id="sharePanel" class="panel" hidden>
+      <div class="pulse" aria-hidden="true"></div>
+      <h2 data-i18n="waitingPeer"></h2>
+      <p class="muted" id="shareHint" data-i18n="shareHint"></p>
+      <div class="linkrow">
+        <input id="shareLink" readonly spellcheck="false" aria-label="link">
+      </div>
+      <div class="row">
+        <button id="copy" class="primary" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span id="copyLabel" data-i18n="copy"></span></button>
+        <button id="shareBtn" class="ghost" type="button" hidden><svg class="ico" aria-hidden="true"><use href="#i-share"/></svg><span data-i18n="share"></span></button>
+        <button id="qrBtn" class="ghost qrbtn" type="button" aria-expanded="false" aria-controls="qr"><svg class="ico" aria-hidden="true"><use href="#i-qr"/></svg><span>QR</span></button>
+      </div>
+      <div class="qrwrap" id="qrWrap">
+        <div id="qr" class="qr"></div>
+        <p class="muted small" data-i18n="qrHint"></p>
+      </div>
+      <div class="codebox">
+        <p class="eyebrow muted" data-i18n="codeTitle"></p>
+        <form id="codeSetForm" class="codeform" autocomplete="off">
+          <input id="codeEdit" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="room code" maxlength="64">
+          <button id="codeSet" class="ghost" type="submit"><svg class="ico" aria-hidden="true"><use href="#i-key"/></svg><span data-i18n="codeSet"></span></button>
+          <p id="codeSetErr" class="small codeerr" hidden></p>
+        </form>
+        <p class="strength" id="codeStrength" hidden></p>
+        <p class="muted small" id="codeRule" data-i18n="codeRule"></p>
+        <div id="codePanel" hidden>
+          <div class="codeshow" id="codeShow"></div>
+          <div class="row coderow">
+            <button id="codeCopy" class="ghost small" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span id="codeCopyLabel" data-i18n="codeCopy"></span></button>
+            <span id="codeTimer" class="mono muted small"></span>
+            <button id="codeOff" class="ghost small" type="button" data-i18n="codeOff"></button>
+          </div>
+          <p class="muted small" id="codeHint" data-i18n="codeHint"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="knockPanel" class="panel" hidden>
+      <div class="knockicon" aria-hidden="true"><svg class="ico"><use href="#i-door"/></svg></div>
+      <h2 data-i18n="knockTitle"></h2>
+      <div class="emojirow big" id="knockEmoji"></div>
+      <p class="muted" data-i18n="knockBody"></p>
+      <div class="row">
+        <button id="admit" class="primary" type="button"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="admit"></span></button>
+        <button id="reject" class="ghost" type="button" data-i18n="reject"></button>
+      </div>
+    </div>
+
+    <div id="waitPanel" class="panel" hidden>
+      <div class="pulse" aria-hidden="true"></div>
+      <p class="muted eyebrow" data-i18n="knockingTitle"></p>
+      <h2 id="waitRoom" class="mono"></h2>
+      <div class="emojirow big" id="waitEmoji"></div>
+      <p class="muted" data-i18n="knockingBody"></p>
+      <p class="small safe"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg><span data-i18n="knockingSafe"></span></p>
+    </div>
+
+    <div id="chat" class="chat" hidden>
+      <div id="ring" class="ring" hidden>
+        <span class="ringicon"><svg class="ico" aria-hidden="true"><use id="ringIconUse" href="#i-phone"/></svg></span>
+        <span id="ringText" class="ringtext"></span>
+        <button id="ringAccept" class="accept" type="button" data-i18n="accept"></button>
+        <button id="ringDecline" class="decline" type="button" data-i18n="decline"></button>
+      </div>
+
+      <div id="call" class="call" hidden>
+        <div class="stage">
+          <video id="remoteVideo" playsinline autoplay></video>
+          <div class="avatar" id="callAvatar">
+            <div class="orb" id="callOrb"></div>
+          </div>
+          <video id="localVideo" class="pip" playsinline autoplay muted hidden></video>
+          <div class="callinfo"><span id="callState"></span><span id="peerFlags"></span></div>
+          <button id="cExpand" class="cexpand" type="button" aria-label="expand"><svg class="ico" aria-hidden="true"><use href="#i-expand"/></svg></button>
+        </div>
+        <div class="callbar">
+          <button id="cMic" class="cbtn" type="button" aria-pressed="false"><svg class="ico" aria-hidden="true"><use id="cMicUse" href="#i-mic"/></svg></button>
+          <button id="cCam" class="cbtn" type="button" aria-pressed="false"><svg class="ico" aria-hidden="true"><use id="cCamUse" href="#i-cam"/></svg></button>
+          <button id="cFlip" class="cbtn" type="button" hidden><svg class="ico" aria-hidden="true"><use href="#i-flip"/></svg></button>
+          <button id="cScreen" class="cbtn" type="button" aria-pressed="false" hidden><svg class="ico" aria-hidden="true"><use href="#i-screen"/></svg></button>
+          <button id="cFx" class="cbtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-mask"/></svg></button>
+          <button id="cEnd" class="cbtn hang" type="button"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
+        </div>
+      </div>
+
+      <div class="verify" id="verify">
+        <div class="vhead"><span class="vtitle" data-i18n="verifyTitle"></span><span class="muted small" data-i18n="verifyHint"></span></div>
+        <div class="emojirow" id="verifyEmoji"></div>
+        <div class="vfoot">
+          <button id="verifyBtn" class="ghost small" type="button"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="verifyBtn"></span></button>
+          <span id="verifyState" class="small muted"></span>
+        </div>
+      </div>
+      <div class="verified" id="verifiedBar" hidden><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg><span class="emojirow tiny" id="verifiedEmoji"></span><span id="verifiedText"></span></div>
+
+      <div id="messages" class="messages" aria-live="polite"></div>
+      <div id="ghost" class="ghost-line" hidden></div>
+      <div id="typing" class="typing" hidden><span></span><span></span><span></span></div>
+
+      <div class="composer-wrap">
+        <div id="moreMenu" class="menu" hidden>
+          <button id="ttlBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-hourglass"/></svg><span data-i18n="ttlTitle"></span><b id="ttlVal">∞</b></button>
+          <button id="liveBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-pen"/></svg><span data-i18n="liveMenu"></span><b id="liveVal"></b></button>
+          <button id="fxBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-mask"/></svg><span data-i18n="fxMenu"></span><b id="fxVal"></b></button>
+          <button id="flashBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg><span data-i18n="flashMenu"></span><b id="flashVal"></b></button>
+          <button id="ipBtn" type="button"><svg class="ico" aria-hidden="true"><use href="#i-eye-off"/></svg><span data-i18n="hideIpMenu"></span><b id="ipVal"></b></button>
+        </div>
+        <div id="replyBar" class="replybar" hidden>
+          <svg class="ico" aria-hidden="true"><use href="#i-reply"/></svg>
+          <div class="rtext"><span class="muted small" data-i18n="replyTo"></span><span id="replyText"></span></div>
+          <button type="button" id="replyCancel" class="tool" aria-label="cancel"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
+        </div>
+        <form id="composer" class="composer" autocomplete="off">
+          <button type="button" id="attach" class="tool" aria-label="attach"><svg class="ico" aria-hidden="true"><use href="#i-attach"/></svg></button>
+          <button type="button" id="more" class="tool" aria-label="more"><svg class="ico" aria-hidden="true"><use href="#i-more"/></svg></button>
+          <div id="recInfo" class="recinfo" hidden><span class="recdot"></span><span id="recTime">0:00</span><span id="recFx" class="muted"></span></div>
+          <button type="button" id="recCancel" class="tool" hidden aria-label="cancel"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
+          <textarea id="input" rows="1" maxlength="4000" enterkeyhint="send"></textarea>
+          <button id="send" class="send" type="submit" aria-label="send" hidden><svg class="ico" aria-hidden="true"><use href="#i-send"/></svg></button>
+          <button id="mic" class="send mic" type="button" aria-label="voice"><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg></button>
+        </form>
+        <input id="fileInput" type="file" multiple hidden>
+      </div>
+      <div class="hint" data-i18n="panicHint"></div>
+    </div>
+
+    <div id="dropZone" class="dropzone" hidden><span data-i18n="dropHere"></span></div>
+    <div id="burnFx" class="burnfx" aria-hidden="true"><div class="embers"></div></div>
+  </main>
+
+  <!-- Записка -->
+  <main id="note" class="view" hidden>
+    <div id="noteCompose" class="panel notepanel">
+      <div class="knockicon" aria-hidden="true"><svg class="ico"><use href="#i-note"/></svg></div>
+      <h2 data-i18n="noteTitle"></h2>
+      <p class="muted" data-i18n="noteSub"></p>
+      <form id="noteForm" autocomplete="off">
+        <textarea id="noteText" rows="5" maxlength="10000" aria-label="note"></textarea>
+        <div class="noterow">
+          <button type="button" id="notePhoto" class="ghost small"><svg class="ico" aria-hidden="true"><use href="#i-image"/></svg><span data-i18n="notePhoto"></span></button>
+          <input id="noteFile" type="file" accept="image/*" hidden>
+          <span id="noteCount" class="small muted mono"></span>
+        </div>
+        <div id="notePreviewWrap" class="notepreview" hidden><img id="notePreview" alt=""><button type="button" id="notePreviewX" class="tool" aria-label="remove"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+        <div class="lifetime">
+          <span class="label" data-i18n="noteTtl"></span>
+          <div class="seg" id="noteTtlSeg" role="radiogroup">
+            <button type="button" role="radio" data-ttl="3600" aria-checked="false" data-i18n="ttl1h"></button>
+            <button type="button" role="radio" data-ttl="86400" aria-checked="true" data-i18n="ttl24h"></button>
+            <button type="button" role="radio" data-ttl="604800" aria-checked="false" data-i18n="ttl7d"></button>
+          </div>
+        </div>
+        <label class="notelabel" for="noteCode" data-i18n="noteCodeLabel"></label>
+        <input id="noteCode" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="64" aria-label="code">
+        <p class="strength" id="noteStrength" hidden></p>
+        <p class="muted small" data-i18n="noteCodeRule"></p>
+        <p id="noteErr" class="small codeerr" hidden></p>
+        <div class="row">
+          <button id="noteSeal" class="primary" type="submit"><svg class="ico" aria-hidden="true"><use href="#i-flame"/></svg><span data-i18n="noteSeal"></span></button>
+          <button id="noteBack" class="ghost" type="button" data-i18n="cancel"></button>
+        </div>
+      </form>
+      <p class="small safe"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg><span data-i18n="noteHonest"></span></p>
+    </div>
+
+    <div id="noteSealed" class="panel notepanel" hidden>
+      <div class="pulse" aria-hidden="true"></div>
+      <h2 data-i18n="noteSealedTitle"></h2>
+      <div class="codeshow" id="noteCodeShow"></div>
+      <p class="muted" id="noteSealedInfo"></p>
+      <div class="row">
+        <button id="noteCopy" class="ghost small" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span id="noteCopyLabel" data-i18n="codeCopy"></span></button>
+      </div>
+      <p class="muted small" data-i18n="noteSealedHint"></p>
+      <div class="row"><button id="noteDone" class="primary" type="button" data-i18n="noteDone"></button></div>
+    </div>
+
+    <div id="noteRead" class="panel notepanel" hidden>
+      <p class="muted eyebrow" data-i18n="noteReadTitle"></p>
+      <div class="notebody">
+        <img id="noteReadImg" alt="" hidden>
+        <div id="noteReadText"></div>
+      </div>
+      <p class="muted small" data-i18n="noteReadHint"></p>
+      <div class="row">
+        <button id="noteBurn" class="danger big" type="button"><span class="fuse" aria-hidden="true"></span><svg class="ico" aria-hidden="true"><use href="#i-flame"/></svg><span id="noteBurnLabel" data-i18n="burn"></span></button>
+      </div>
+    </div>
+    <div class="burnfx" aria-hidden="true"><div class="embers"></div></div>
+  </main>
+
+  <!-- Конец -->
+  <main id="end" class="view" hidden>
+    <div class="ash" aria-hidden="true"><span></span><span></span><span></span></div>
+    <h2 id="endTitle"></h2>
+    <p class="zero" data-i18n="zero"></p>
+    <p class="muted" id="endStats"></p>
+    <p class="muted" data-i18n="gone"></p>
+    <button id="again" class="primary big" type="button" data-i18n="again"></button>
+  </main>
+
+  <!-- Действия с сообщением -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheetbox" role="menu">
+      <button type="button" data-act="react" role="menuitem"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span data-i18n="react"></span></button>
+      <button type="button" data-act="reply" role="menuitem"><svg class="ico" aria-hidden="true"><use href="#i-reply"/></svg><span data-i18n="reply"></span></button>
+      <button type="button" data-act="copy" role="menuitem"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span data-i18n="copyText"></span></button>
+      <button type="button" data-act="del" role="menuitem" class="del"><svg class="ico" aria-hidden="true"><use href="#i-trash"/></svg><span data-i18n="delBoth"></span></button>
+    </div>
+  </div>
+
+  <div id="flashView" class="flashview" hidden>
+    <div class="flashbar"><i id="flashBar"></i></div>
+    <img id="flashImg" alt="">
+    <p class="small" data-i18n="flashRelease"></p>
+  </div>
+  <div id="lightbox" class="lightbox" hidden>
+    <img id="lbImg" alt="">
+    <a id="lbSave" class="primary"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg><span data-i18n="save"></span></a>
+  </div>
+  <div id="veil" class="veil" hidden><svg class="ico" aria-hidden="true"><use href="#i-eye-off"/></svg><span data-i18n="veiled"></span></div>
+  <div id="toast" class="toast" hidden></div>
+</body>
+</html>

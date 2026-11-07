@@ -1,0 +1,47 @@
+name = "cant-chat"
+main = "src/worker.js"
+compatibility_date = "2025-10-01"
+
+# Логи и аналитика выключены: мы ничего не записываем.
+[observability]
+enabled = false
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/ws/*", "/ice", "/note/*"]
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+# Записки: единственное, что сервер хранит (зашифрованный блок до 7 дней, удаляется при открытии).
+[[durable_objects.bindings]]
+name = "NOTES"
+class_name = "Note"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Note"]
+
+# Ограничение частоты: не больше 30 новых подключений к комнатам в минуту
+# с одного IP-адреса. Защищает от перебора и от расхода TURN-трафика.
+# Ничего настраивать не нужно, работает само.
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 30
+  period = 60
+
+# Чтобы сайт открывался на cant.chat, раскомментируй две строки ниже
+# (домен уже должен быть добавлен в Cloudflare, см. README):
+# [[routes]]
+# pattern = "cant.chat"
+# custom_domain = true

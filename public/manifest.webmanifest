@@ -1,0 +1,10 @@
+{
+  "name": "cant.chat",
+  "short_name": "cant.chat",
+  "description": "A secret language for one conversation. One-time encrypted rooms for two; nothing stored.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0c0c",
+  "theme_color": "#0c0c0c",
+  "icons": [{ "src": "/favicon.svg?v=3", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
