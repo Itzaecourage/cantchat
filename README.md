@@ -1,155 +1,124 @@
 # cant.chat
 
-**A secret language for one conversation.** Одноразовые зашифрованные комнаты на двоих прямо в браузере: переписка, звонки, файлы. Ничего не скачивать, ничего не хранится, после выхода комнаты больше нет.
+**A secret language for one conversation.**
+
+A one-time, end-to-end encrypted room for two people — chat, voice/video calls and file transfer — straight in the browser. No app, no account, no phone number, no email. The room exists only while you're both in it. Leave, and it's gone.
+
+**[cant.chat](https://cant.chat)** · [How it works](https://cant.chat/how.html) · Built in Sweden 🇸🇪 · MIT licensed
 
 ---
 
-## Как обновить уже запущенный сайт (5 минут)
+## Why
 
-Если сайт уже работает на Cloudflare, обновление — это три действия:
+Sometimes you need exactly one private conversation with exactly one person — hand over a password, discuss something sensitive, send a document — and you don't want it living forever in someone's chat history. Installing an app and exchanging phone numbers for that is overkill. cant.chat is the minimum thing that works: open a room, send the link, talk, close the tab.
 
-1. **Замени файлы.** Открой папку проекта на компьютере и замени её содержимое содержимым этого архива (папки `public`, `src`, `tests` и файлы `wrangler.toml`, `package.json`, `README.md`, `LICENSE`). Папку `node_modules`, если она есть, можно не трогать.
-2. **Открой командную строку в папке проекта.** В Проводнике Windows зайди в папку проекта, щёлкни в адресной строке, напиши `cmd` и нажми Enter.
-3. **Введи две команды** (каждую — Enter и дождись окончания):
-   ```
-   npm install
-   npx wrangler deploy
-   ```
-   Первый раз `wrangler` откроет браузер и попросит войти в Cloudflare — войди и вернись в окно командной строки.
+## What makes it trustworthy
 
-Готово: сайт обновился. Старые комнаты не пострадают — они и так живут только пока в них кто-то есть. Если в `wrangler.toml` появилась новая миграция (например, `tag = "v2"` для записок), wrangler применит её сам при деплое — ничего дополнительно делать не нужно.
+**Nothing to trust, everything to verify.** The claims below can be checked by reading this repository — the whole project is ~4,600 lines, and all the cryptography lives in [`public/crypto.js`](public/crypto.js), which is 138 lines.
 
-> Если `npx wrangler deploy` ругается на `ratelimits` — значит, установилась старая версия wrangler. Введи `npm install wrangler@latest --save-dev` и повтори `npx wrangler deploy`.
+- **Keys never leave your browser.** The 32-byte room key is in the URL *fragment* (after `#`). Browsers never send the fragment to any server. The server only ever learns a hash-derived room ID that cannot be reversed to the key.
+- **Even the host can't read anything.** Every message is sealed client-side with AES-256-GCM before it touches the network. The server (and the hosting provider underneath it) relays ciphertext. We designed it so that trusting the host is not required.
+- **Forward secrecy.** Each session does a fresh ephemeral ECDH P-256 exchange, so a link that leaks *later* does not expose what was said *earlier*.
+- **Zero crypto dependencies.** Built only on the browser's native WebCrypto API — no npm crypto libraries, no supply chain to compromise.
+- **No account, no identity.** No sign-up, no phone number, no email, no cookies.
+- **No trackers, no third-party resources.** Strict CSP (`default-src 'none'`), HSTS, `Referrer-Policy: no-referrer`. Open DevTools → Network and see for yourself: every request goes to `cant.chat` and nowhere else.
+- **Rooms live in memory only.** A room is one Durable Object holding at most two WebSockets; the storage API is never called for rooms (see [`src/worker.js`](src/worker.js)). There is no database to subpoena, breach, or "accidentally" retain.
+- **Replay protection.** Every message carries a fresh 96-bit IV and a strictly increasing counter; replays and reflections are rejected.
+- **MITM check.** Both sides see four emoji derived from the room key and both public keys. If they match, nobody is in the middle.
+- **Calls and files are peer-to-peer.** WebRTC with DTLS-SRTP, browser to browser. Optional "Hide my IP" mode relays media through a TURN server (still encrypted end-to-end).
 
-## Как запустить с нуля
+## What it does *not* protect against
 
-1. Зарегистрируйся на [dash.cloudflare.com](https://dash.cloudflare.com) (бесплатно).
-2. Установи [Node.js](https://nodejs.org) (версия LTS, «рекомендуемая»).
-3. Распакуй архив, открой командную строку в папке проекта (см. выше) и введи:
-   ```
-   npm install
-   npx wrangler deploy
-   ```
-4. В конце wrangler напишет адрес вида `https://cant-chat.<твоё-имя>.workers.dev`. Открой его, создай комнату, открой ссылку на телефоне и проверь.
+We'd rather you know the limits than find out later.
 
-## Как подключить домен cant.chat
-
-1. В Cloudflare: **Add a domain** (или **Onboard a domain**) → введи `cant.chat` → бесплатный тариф.
-2. Cloudflare покажет два адреса **nameservers**. Зайди туда, где покупал домен, и замени nameservers на эти два. Это занимает от 10 минут до нескольких часов.
-3. Когда домен станет активным (в Cloudflare у него будет статус **Active**): открой файл `wrangler.toml` в Блокноте и убери `# ` в начале двух последних строк, чтобы получилось:
-   ```
-   [[routes]]
-   pattern = "cant.chat"
-   custom_domain = true
-   ```
-4. Снова `npx wrangler deploy`. Через минуту сайт откроется на https://cant.chat.
-
-(Вместо правки файла можно сделать то же самое в панели: **Workers & Pages** → `cant-chat` → **Settings** → **Domains & Routes** → **Add** → **Custom domain** → `cant.chat`.)
-
-## Необязательно, но советую: релей для звонков (TURN) и режим «скрыть мой IP»
-
-Звонки и прямая передача файлов работают у большинства людей сразу. Но некоторые мобильные операторы и корпоративные сети не дают браузерам соединиться напрямую. Для таких случаев нужен TURN — релей, который пересылает уже зашифрованный звук, видео и файлы. Тот же релей включает в меню комнаты пункт **«Скрыть мой IP»**: тогда собеседник не видит твой адрес.
-
-1. В Cloudflare найди раздел **Realtime** (раньше назывался **Calls**) → **TURN Server** → **Create**.
-2. Cloudflare выдаст **Key ID** и **API Token**.
-3. **Workers & Pages** → `cant-chat` → **Settings** → **Variables and Secrets** → добавь две переменные:
-   - `TURN_KEY_ID` = твой Key ID
-   - `TURN_KEY_API_TOKEN` = твой API Token (тип **Secret**)
-4. Нажми **Deploy**. Всё: сайт сам начнёт выдавать временные доступы к релею — только людям, которые уже вдвоём в комнате, не чаще раза в полчаса и не больше четырёх раз на соединение. Открытого эндпоинта, который раздавал доступы любому, больше нет.
-
-У Cloudflare есть бесплатный объём TURN-трафика (сейчас 1 ТБ в месяц, точные условия смотри у них). Если TURN не настроен, сайт работает как раньше, а пункт «Скрыть мой IP» показывает «нет релея».
-
-**Что ещё можно сделать руками (необязательно):**
-- `wrangler.toml` → `[[ratelimits]]` → `limit = 30` — сколько новых подключений в минуту разрешено с одного IP-адреса. 30 хватает с запасом; если твой сайт будут открывать сотни человек из одной офисной сети, подними до 100.
-
-## Юридические страницы (владелец в Швеции)
-
-В папке `public` три страницы на английском, шведском и русском (переключатель языка вверху; английская версия — основная). Данные владельца (имя, адрес в Boden, `mail@cant.chat`, дата, «не участвуем в ARN») уже вписаны во все языковые версии. Это не юридическая консультация — при желании покажи тексты специалисту.
-
-| Файл | Что это | Если меняется |
-|---|---|---|
-| `public/legal.html` | Юридическая информация — сведения о поставщике по шведскому закону об электронной торговле и DSA | адрес, e-mail; при регистрации фирмы — добавить organisationsnummer |
-| `public/privacy.html` | Политика конфиденциальности (GDPR; надзорный орган — IMY) | дата «Обновлено» при изменениях сервиса; абзац про TURN удалить, если релей отключишь |
-| `public/abuse.html` | «Сообщить о нарушении» — контакт для жалоб и уведомлений по DSA | адрес для жалоб (`mail@cant.chat`, включая `mailto:`) |
-
-Правка — поиском по тексту в трёх языковых блоках каждого файла (`<section id="en">`, `"sv"`, `"ru"`). Под логотипом на главной и на этих страницах стоит метка «Byggt i Sverige» с флагом — текст в `public/index.html` и в каждой странице, класс `origin`. Технические факты в текстах («сервер видит IP, не видит содержимое, ничего не хранит, cookies нет, в localStorage только язык и настройка IP, записки — только шифр до 7 дней») соответствуют коду.
-
-## Что сервер видит, а что нет (честно)
-
-```
-Сообщения:     Браузер A ──шифр──▶ Cloudflare (только пересылает) ──шифр──▶ Браузер B
-Звонки, файлы: Браузер A ◀──────── напрямую (WebRTC, DTLS-SRTP) или через TURN ────────▶ Браузер B
-```
-
-- **Видит:** IP-адреса, время подключения, объём зашифрованных данных, идентификатор комнаты (хеш ключа; обратно в ключ не превращается). Это видит и Cloudflare как хостинг.
-- **Не видит никогда:** ключ, текст, файлы, звук, видео, кто с кем говорит по именам. Ключ живёт в ссылке после `#` — эту часть браузер не отправляет ни на какой сервер.
-- **Не хранит ничего:** комната — объект в оперативной памяти Cloudflare, живёт пока в ней кто-то есть. Логи выключены (`observability.enabled = false`). Единственное исключение — записки: зашифрованный блок + срок, удаляется при открытии или по сроку.
-- **Прямой звонок показывает твой IP собеседнику** (как любой P2P-звонок). Если настроен TURN, режим «Скрыть мой IP» (включён по умолчанию) пускает звонки и файлы через релей.
-
-## Что умеет
-
-**Приватность**
-- Комната в один клик, ссылка вида `cant.chat/#silent-fox-42.<ключ>` и QR-код
-- Код комнаты — запасной способ, когда ссылку передать нельзя (по телефону, на бумаге): хозяин сам задаёт код (любой, минимум 6 знаков; под полем живой индикатор силы), гость вводит его на главной. Код живёт 10 минут и работает один раз. Настоящий ключ остаётся 256-битным, код лишь передаёт его через одноразовую «прихожую» (подробно в `public/code.js` и на странице «Как это устроено»)
-- Сквозное шифрование: ECDH P-256 + HKDF + AES-256-GCM, встроенный WebCrypto; одноразовые ключи на каждый разговор (утечка ссылки потом не раскроет старую переписку)
-- «Тук-тук»: создатель сам впускает гостя, третий человек войти не может
-- Ритуал сверки: четыре эмодзи с названиями, оба читают вслух и нажимают «Совпадают» → статус «Проверено»
-- Ключ стирается из адресной строки и истории браузера
-- Никаких cookies, аналитики, сторонних скриптов и шрифтов
-
-**Записки (сгорают при прочтении)**
-- Кнопка «Оставить записку» на главной: текст до 10 000 знаков и одно фото (ужимается в браузере до 1 МБ), срок 1 час / 24 часа / 7 дней, свой код (любой, минимум 8 знаков; индикатор «слабый / нормальный / сильный» показывает, насколько его трудно угадать). Получатель вводит код на главной — то же поле, что для комнат, сайт сам понимает, что это записка
-- Это единственное, что сервер хранит: зашифрованный блок и время сгорания. Удаляется в момент первого открытия или по сроку. Ключ выводится из кода и на сервер не попадает — прочитать записку мы не можем (так и написано на сайте и в Datenschutzerklärung, раздел 3.5)
-
-**Общение**
-- Аудио- и видеозвонки напрямую; в звонке — микрофон, камера, задняя камера, показ экрана (с компьютера), на весь экран
-- Изменение голоса: низкий, высокий, робот — в звонках и голосовых
-- Голосовые: удерживай микрофон или нажми, потом нажми ещё раз
-- Фото, видео, любые файлы до 1 ГБ напрямую (до 50 МБ через сервер, если прямого соединения нет). Перетащить файл в окно или вставить картинку через Ctrl+V. Если у собеседника на телефоне не хватит памяти под файл — отправитель это увидит сразу
-- Ответ на сообщение, копирование, «удалить у обоих» (долгое нажатие или правый клик), ❤️ двойным кликом
-- Фото-«вспышка»: показывается один раз, пока получатель держит палец, 3/5/10 секунд, без кнопки «сохранить»; отправитель видит «Просмотрено». Скриншот, как и везде, запретить нельзя — так и написано
-- Кликабельные ссылки (без предпросмотра — ничего не подгружается)
-- Живой набор, исчезающие сообщения (30 с / 5 мин), отметки «прочитано», тихие звуки, счётчик в заголовке вкладки
-
-**Сгорает без следа**
-- Комната живёт, пока вы оба в ней: вышел один — исчезла для обоих
-- «Сжечь» — нужно зажать на секунду (случайно не нажмёшь); огонь и искры у обоих, всё стирается
-- Финальный экран: «Сохранено: 0 байт» и сколько сообщений и файлов стало пеплом
-- Приватный блюр, когда ты отвлёкся от вкладки; паник-кнопка: два раза Esc
-
-**Надёжность**
-- Пропала связь или телефон сменил Wi-Fi на мобильный интернет: комната ждёт 90 секунд и восстанавливается сама (с секретным токеном — чужой со ссылкой не сможет «переподключиться» вместо тебя). Сообщения, написанные за это время, доходят
-- Гость открыл ссылку, пока хозяин временно отключён: ждёт и стучится заново, когда тот вернётся
-- Закрыл вкладку — собеседник сразу видит
-- Экран не гаснет во время звонка; клавиатура на iPhone не ломает раскладку
-
-## Как это устроено
-
-| Файл | Что делает |
+| Protects against | Does not protect against |
 |---|---|
-| `src/worker.js` | Сервер. Комната = объект в памяти Cloudflare на двоих: пересылает шифр, выдаёт TURN-доступы только в комнате на двоих, ограничивает частоту подключений, в хранилище не пишет. Записка = отдельный объект (класс `Note`): хранит только шифр и срок, удаляет при открытии |
-| `public/crypto.js` | Шифрование (WebCrypto) |
-| `public/app.js` | Интерфейс и логика комнаты |
-| `public/rtc.js` | Прямое соединение (WebRTC), режим «только через релей» |
-| `public/files.js` | Передача файлов кусками, напрямую или через сервер, лимиты памяти |
-| `public/media.js`, `voice-worklet.js` | Микрофон, камера, изменение голоса, запись голосовых, wake lock |
-| `public/words.js` | Имена комнат, 64 эмодзи и их названия на двух языках |
-| `public/code.js` | Код комнаты (своя фраза хозяина → временный ключ «прихожей») |
-| `public/how.html` | Страница «Как это устроено» (для людей и для специалистов по криптографии) |
-| `public/i18n.js` | Все тексты интерфейса: EN (основной), SV, RU. Кнопка вверху справа листает языки по кругу; язык браузера определяется автоматически |
-| `public/qr.js` | Свой генератор QR-кода, ссылка никуда не отправляется |
-| `public/_headers` | Строгие заголовки безопасности (CSP без inline-скриптов, HSTS, no-referrer) |
-| `public/legal.html`, `privacy.html`, `abuse.html` | Юридические страницы-шаблоны (EN + RU) |
-| `public/page.js` | Переключатель языка на статических страницах |
-| `public/source.zip` | Весь исходный код проекта для скачивания с сайта (ссылка на странице «Как это устроено»). Я пересобираю его при каждом обновлении. Если меняешь код сам — запакуй папку проекта заново (без `node_modules` и `.wrangler`) и положи под этим именем |
-| `tests/` | Автотесты (сайту для работы не нужны, в деплой не попадают) |
+| Your ISP, Wi-Fi, or anyone on the wire | The other person in the room (they can screenshot, copy, forward) |
+| The server operator and the hosting provider reading content | Someone who legitimately receives the link (the emoji check detects a man-in-the-middle, not an impostor) |
+| A link that leaks after the conversation (forward secrecy) | Traffic analysis: the server sees IP addresses, timing, and data volume |
+| Replay and reflection attacks | A compromised device or browser |
+| Third-party tracking | A compromised server serving malicious JavaScript — see below |
 
-Служебные данные прямого соединения передаются внутри зашифрованного канала комнаты, поэтому сервер не может подменить собеседника и в звонке.
+**On "web crypto can't be trusted":** this is a real limitation of any browser-delivered app — the code is fetched from the server on every visit. Our mitigations: the code is small enough to actually read, there are no bundlers or minifiers obscuring what ships, and the repository is exactly what runs on cant.chat, server included. You can compare the served files against this repo at any time (`curl -s https://cant.chat/crypto.js | diff - public/crypto.js`). If you need stronger guarantees than that, use a native app with reproducible builds — we won't pretend otherwise.
 
-**Честное ограничение:** собеседник может сделать скриншот или записать экран. Браузер не может этого запретить.
+## How it works (short version)
 
-## Тесты
+1. The browser generates a random 32-byte **link key** and puts it in the URL fragment.
+2. `wrapKey = HKDF-SHA256(linkKey)` encrypts the **handshake**, so the server can't tamper with it.
+3. Each participant generates an ephemeral **ECDH P-256** key pair; the shared secret goes through HKDF-SHA256 into a per-session **AES-256-GCM** key.
+4. Messages are sealed with that key, a fresh 96-bit IV and a monotonic counter.
+5. When either participant leaves or presses **Burn**, both browsers wipe memory and the Durable Object is discarded. There is no server-side copy to delete.
 
-См. `tests/README.md`. Коротко: `node tests/devserver.cjs`, затем `node tests/e2e.cjs`, `node tests/reconnect.cjs`, `node tests/server.cjs`, `node tests/code.cjs`, `node tests/note.cjs`, `node tests/hideip.cjs`.
+Optional extras:
 
-Лицензия MIT.
+- **Room code** — a human-friendly code instead of a link. PBKDF2-SHA256, 200,000 iterations, single-use 10-minute lobby.
+- **Notes** — a sealed asynchronous message the recipient opens by code. This is the *only* thing the server stores: one encrypted blob plus an expiry (1 hour, 24 hours or 7 days). It is deleted on first open or at expiry, whichever comes first. The server cannot read it, restore it, or tell who opened it.
+
+Full details, in three languages: [cant.chat/how.html](https://cant.chat/how.html).
+
+## What the server sees
+
+| Sees | Never sees |
+|---|---|
+| IP addresses | Keys |
+| Connection timing | Message text |
+| Data volume | Files, voice, video |
+| Hashed room fingerprint | Names (there are none) |
+
+Logging and observability are disabled in [`wrangler.toml`](wrangler.toml).
+
+## Project layout
+
+```
+public/
+  crypto.js      all cryptography (138 lines) — start here
+  app.js         UI and room state machine
+  rtc.js         WebRTC calls, P2P file transfer
+  code.js        room codes (PBKDF2)
+  files.js       file sealing / fallback through the server
+  _headers       CSP, HSTS and other security headers
+  how.html       the full technical explanation
+src/
+  worker.js      Cloudflare Worker + Room / Note Durable Objects (311 lines)
+tests/           end-to-end tests in a real browser (two peers, fake camera and mic);
+                 the relay log is checked to contain no plaintext
+```
+
+## Run it yourself
+
+Requirements: [Node.js](https://nodejs.org) LTS and a free [Cloudflare](https://dash.cloudflare.com) account.
+
+```bash
+npm install
+npx wrangler deploy
+```
+
+Wrangler prints a `https://cant-chat.<you>.workers.dev` URL. Open it, create a room, open the link on your phone, talk.
+
+To use your own domain, add it to Cloudflare, then uncomment the two `[[routes]]` lines at the bottom of `wrangler.toml` and deploy again.
+
+Optional TURN relay ("Hide my IP" mode) needs two Cloudflare secrets: `TURN_KEY_ID` and `TURN_KEY_API_TOKEN` (`npx wrangler secret put …`). Without them the site works fine, just without the relay option.
+
+### Tests
+
+```bash
+npm i -D playwright ws && npx playwright install chromium
+LOG=1 TEST_DROP=1 node tests/devserver.cjs &   # local stand-in for the Worker, http://localhost:8788
+node tests/e2e.cjs        # chat, verification, P2P, files, voice, calls, network drop, burn
+node tests/reconnect.cjs  # server restart mid-conversation
+node tests/code.cjs       # room codes
+node tests/note.cjs       # notes
+node tests/server.cjs     # server rules: tokens, ICE only with two peers, rate limit
+node tests/hideip.cjs     # TURN relay mode
+node tests/pages.cjs      # static pages, three languages
+```
+
+See [`tests/README.md`](tests/README.md) for environment variables.
+
+## Security
+
+Found a weakness? We want to hear it. Please report it through the [abuse/contact page](https://cant.chat/abuse.html) before publishing, and we'll respond quickly. There has been no independent third-party audit yet — the code is short on purpose so that anyone can do their own.
+
+## License
+
+[MIT](LICENSE). Use it, fork it, host your own.
